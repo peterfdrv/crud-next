@@ -1,22 +1,43 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AddTopic() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSumbit = (e) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form is submitting...');
 
     if (!title || !description) {
       alert('Title and description are required');
       return;
     }
+    try {
+      const res = await fetch('http://localhost:3000/api/topics', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify({ title, description }),
+      });
+
+      if (res.ok) {
+        router.push('/');
+      } else {
+        throw new Error('Failed to make a new topic');
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
-    <form onSubmit={handleSumbit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <input
         onChange={(e) => setTitle(e.target.value)}
         value={title}
